@@ -200,7 +200,15 @@ function nextTurn() {
 }
 
 function printBoard() {
-  console.log('apple');
+  for (y = 0; y < 10; y++) {
+    for (x = 0; x < 10; x++) {
+      if (state.board[y][x] === null) {
+        console.log(' ');
+      } else {
+        console.log(state.board[y][x]);
+      }
+    }
+  }
 }
 
 function main() {
