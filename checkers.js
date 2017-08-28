@@ -201,18 +201,23 @@ function nextTurn() {
 
 function printBoard() {
   for (y = 0; y < 10; y++) {
+    var fullLine = '';
     for (x = 0; x < 10; x++) {
       if (state.board[y][x] === null) {
-        console.log(' ');
+        fullLine += ' ';
       } else {
-        console.log(state.board[y][x]);
+        fullLine += state.board[y][x];
       }
+      if (x == 9) fullLine += '\n';
     }
+    console.log(fullLine);
   }
 }
 
 function main() {
   printBoard();
 }
+
+main();
 
 // End.
