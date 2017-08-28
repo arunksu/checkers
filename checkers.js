@@ -200,7 +200,7 @@ function nextTurn() {
 }
 
 function printBoard() {
-  for (y = 0; y < 10; y++) {
+  for (y = 0; y < 9; y++) {
     var fullLine = '';
     for (x = 0; x < 10; x++) {
       if (state.board[y][x] === null) {
