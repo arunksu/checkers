@@ -1,5 +1,9 @@
 // checkers.js
 
+// Require statements.
+// const readLine is set to an instance of the library 'readline'.
+const readLine = require('readline');
+
 /** The state of the game */
 var state = {
   over: false,
@@ -199,25 +203,91 @@ function nextTurn() {
   else state.turn = 'b';
 }
 
+// Print board.
 function printBoard() {
-  for (y = 0; y < 9; y++) {
-    var fullLine = '';
-    for (x = 0; x < 10; x++) {
-      if (state.board[y][x] === null) {
-        fullLine += ' ';
-      } else {
-        fullLine += state.board[y][x];
-      }
-      if (x == 9) fullLine += '\n';
-    }
-    console.log(fullLine);
-  }
+  console.log("   a b c d e f g h i j");
+  state.board.forEach(function(row, index) {
+    var ascii = row.map(function(square) {
+      if (!square) return '_';
+      else return square;
+    }).join('|');
+    console.log(index, ascii);
+  });
 }
 
+// Main.
 function main() {
+  // Init readline.
+  const rl = readLine.createInterface({
+  input: process.stdin,
+  output: process.stdout
+  });
+
+  // Print board.
   printBoard();
+
+  // Print instructions.
+  console.log(state.turn + "'s turn'");
+  rl.question("Pick a piece to move, (letter, number)", function(answer){
+    // Regex (, followed by ? says comma is optional, same with \s (space)
+    // followed by ? to say space is also optional).
+    // Regex's have functions too (such as .exec() in this case).
+    var match = /([a-j]),?\s?([0-9])/.exec(answer);
+    if (match) {
+      // Turn the letter into integer for coordinates.
+      var x = match[1].charCodeAt(0) - 'a'.charCodeAt(0);
+      // Turn the string into integer for coordinates.
+      var y = parseInt(match[2]);
+
+      var piece = state.board[y][x];
+      var moves = getLegalMoves(piece, x, y);
+
+      moves.forEach(function(move) {
+        if (move.type === 'slide') {
+          console.log("You can slide to " + String.fromCharacterCode(97 + x) + "," + y);
+        } else {
+          console.log("You can jump to ...");
+        }
+      })
+    }
+  });
 }
 
+// Let us start the game.
 main();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // End.
