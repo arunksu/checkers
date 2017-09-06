@@ -19,6 +19,11 @@ var state = {
   captures: {w: 0, b: 0}
 }
 
+// Keep track of the squares we highlighted last so we can
+// un-highlight them when click event is called again.
+// This prevents the squares from staying highlighted forever.
+var lastHighlightedSquares = [];
+
 /** @function getLegalMoves
   * returns a list of legal moves for the specified
   * piece to make.
@@ -199,13 +204,23 @@ function nextTurn() {
 }
 
 function handleCheckerClick(event) {
+  for (var i = 0; i < lastHighlightedSquares.length; i++){
+    lastHighlightedSquares[i].classList.remove('highlight');
+  }
+
   event.preventDefault();
   var parentId = event.target.parentElement.id;
   var x = parseInt(parentId.charAt(7));
   var y = parseInt(parentId.charAt(9));
   var moves = getLegalMoves(state.board[y][x], x, y);
-  console.log(x, y);
+
   // Highlight squares you can move to.
+  for (var m = 0; m < moves.length; m++) {
+    var possibleMove = moves[m];
+    var square = document.getElementById('square-' + possibleMove.x + '-' + possibleMove.y);
+    square.classList.add('highlight');
+    lastHighlightedSquares.push(square);
+  }
 }
 
 function setup() {
