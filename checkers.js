@@ -5,16 +5,18 @@ var state = {
   over: false,
   turn: 'b',
   board: [
-    [null,'w',null,'w',null,'w',null,'w',null,'w'],
+    [null,'w',null, 'w', null, 'w',  null, 'w',  null, 'w'],
     ['w',null,'w',null,'w',null,'w',null,'w',null],
     [null,'w',null,'w',null,'w',null,'w',null,'w'],
+    ['w',null,'w',null,'w',null,'w',null,'w',null],
     [null, null, null, null, null, null, null, null, null, null],
     [null, null, null, null, null, null, null, null, null, null],
-    [null, null, null, null, null, null, null, null, null, null],
+    [null,'b',null,'b',null,'b',null,'b',null,'b'],
     ['b',null,'b',null,'b',null,'b',null,'b',null],
     [null,'b',null,'b',null,'b',null,'b',null,'b'],
     ['b',null,'b',null,'b',null,'b',null,'b',null]
-  ]
+  ],
+  captures: {w: 0, b: 0}
 }
 
 /** @function getLegalMoves
@@ -30,13 +32,13 @@ function getLegalMoves(piece, x, y) {
   var moves = [];
   switch(piece) {
     case 'b': // black can only move down the board diagonally
-      checkSlide(moves, x-1, y+1);
-      checkSlide(moves, x+1, y+1);
+      checkSlide(moves, x-1, y-1);
+      checkSlide(moves, x+1, y-1);
       checkJump(moves, {captures:[],landings:[]}, piece, x, y);
       break;
     case 'w':  // white can only move up the board diagonally
-      checkSlide(moves, x-1, y-1);
-      checkSlide(moves, x+1, y-1);
+      checkSlide(moves, x-1, y+1);
+      checkSlide(moves, x+1, y+1);
       checkJump(moves, {captures:[],landings:[]}, piece, x, y);
       break;
     case 'bk': // kings can move diagonally any direction
@@ -96,19 +98,19 @@ function copyJumps(jumps) {
 function checkJump(moves, jumps, piece, x, y) {
   switch(piece) {
     case 'b': // black can only move down the board diagonally
-      checkLanding(moves, copyJumps(jumps), x-1, y+1, x-2, y+2);
-      checkLanding(moves, copyJumps(jumps), x+1, y+1, x+2, y+2);
+      checkLanding(moves, copyJumps(jumps), piece, x-1, y-1, x-2, y-2);
+      checkLanding(moves, copyJumps(jumps), piece, x+1, y-1, x+2, y-2);
       break;
     case 'w':  // white can only move up the board diagonally
-      checkLanding(moves, copyJumps(jumps), x-1, y-1, x-2, y-2);
-      checkLanding(moves, copyJumps(jumps), x+1, y-1, x+2, y-2);
+      checkLanding(moves, copyJumps(jumps), piece, x-1, y+1, x-2, y+2);
+      checkLanding(moves, copyJumps(jumps), piece, x+1, y+1, x+2, y+2);
       break;
     case 'bk': // kings can move diagonally any direction
     case 'wk': // kings can move diagonally any direction
-      checkLanding(moves, copyJumps(jumps), x-1, y+1, x-2, y+2);
-      checkLanding(moves, copyJumps(jumps), x+1, y+1, x+2, y+2);
-      checkLanding(moves, copyJumps(jumps), x-1, y-1, x-2, y-2);
-      checkLanding(moves, copyJumps(jumps), x+1, y-1, x+2, y-2);
+      checkLanding(moves, copyJumps(jumps), piece, x-1, y+1, x-2, y+2);
+      checkLanding(moves, copyJumps(jumps), piece, x+1, y+1, x+2, y+2);
+      checkLanding(moves, copyJumps(jumps), piece, x-1, y-1, x-2, y-2);
+      checkLanding(moves, copyJumps(jumps), piece, x+1, y-1, x+2, y-2);
       break;
   }
 }
@@ -133,8 +135,8 @@ function checkLanding(moves, jumps, piece, cx, cy, lx, ly) {
   // Check landing square is unoccupied
   if(state.board[ly][lx]) return;
   // Check capture square is occuped by opponent
-  if(piece == 'b' || 'bk' && state.board[cy][cx] != 'w' || state.board[cy][cx] != 'wk') return;
-  if(piece == 'w' || 'wk' && state.board[cy][cx] != 'b' || state.board[cy][cx] != 'bk') return;
+  if((piece === 'b' || piece === 'bk') && !(state.board[cy][cx] === 'w' || state.board[cy][cx] === 'wk')) return;
+  if((piece === 'w' || piece === 'wk') && !(state.board[cy][cx] === 'b' || state.board[cy][cx] === 'bk')) return;
   // legal jump! add it to the moves list
   jumps.captures.push({x: cx, y: cy});
   jumps.landings.push({x: lx, y: ly});
@@ -149,17 +151,17 @@ function checkLanding(moves, jumps, piece, cx, cy, lx, ly) {
 
 /** @function ApplyMove
   * A function to apply the selected move to the game
-  * @param {integer} y - starting y position.
-  * @param {integer} x - starting x position.
   * @param {object} move - the move to apply.
   */
 function applyMove(x, y, move) {
   // TODO: Apply the move
-  if (move.type === 'slide') {
+  if(move.type === "slide") {
     state.board[move.y][move.x] = state.board[y][x];
     state.board[y][x] = null;
   } else {
-    move.captures.forEach(function(square) {
+    move.captures.forEach(function(square){
+      var piece = state.board[square.y][square.x];
+      state.captures[piece.substring(0,1)]++;
       state.board[square.y][square.x] = null;
     });
     var index = move.landings.length - 1;
@@ -168,83 +170,30 @@ function applyMove(x, y, move) {
   }
 }
 
-// TODO: Check for victory
+/** @function checkForVictory
+  * Checks to see if a victory has been actived
+  * (All peices of one color have been captured)
+  * @return {String} one of three values:
+  * "White wins", "Black wins", or null, if neither
+  * has yet won.
+  */
 function checkForVictory() {
-  var wCount = 0;
-  var bCount = 0;
-  for (y = 0; y < 10; y++) {
-    for (x = 0; x < 10; x++) {
-      if (state.board[y][x] === 'w' || state.board[y][x] === 'wk') {
-        wCount++;
-      }
-      if (state.board[y][x] === 'b' || state.board[y][x] === 'bk') {
-        bCount++;
-      }
-    }
-  }
-  if (wCount == 0) {
+  if(state.captures.w == 20) {
     state.over = true;
     return 'black wins';
   }
-  if (bCount == 0) {
+  if(state.captures.b == 20) {
     state.over = true;
     return 'white wins';
   }
-  return false;
+  return null;
 }
 
-// TODO: Start the next turn
+/** @function nextTurn()
+  * Starts the next turn by changing the
+  * turn property of state.
+  */
 function nextTurn() {
-  if (state.turn === 'b') state.turn = 'w';
+  if(state.turn === 'b') state.turn = 'w';
   else state.turn = 'b';
 }
-
-function printBoard() {
-  console.log('apple');
-}
-
-function main() {
-  printBoard();
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// End.
