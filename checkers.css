@@ -35,11 +35,11 @@
 }
 
 .square.highlight {
-  background-color: yellow;
+  background-color: lightgreen;
 }
 
 .checker.highlight {
-  border: 3px solid yellow;
+  border: 3px solid lightgreen;
   width: 80px;
   height: 80px;
 }
