@@ -38,6 +38,10 @@
   background-color: lightgreen;
 }
 
+.square.droptarget {
+  background-color: orange;
+}
+
 .checker.highlight {
   border: 3px solid lightgreen;
   width: 80px;
